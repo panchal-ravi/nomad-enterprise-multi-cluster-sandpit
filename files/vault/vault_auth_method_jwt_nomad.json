@@ -1,0 +1,5 @@
+{
+    "jwks_url": "https://rp-nomad-bnkywpoq-http-lb-290154433.ap-southeast-1.elb.amazonaws.com:8080/.well-known/jwks.json",
+    "jwt_supported_algs": ["RS256", "EdDSA"],
+    "default_role": "nomad-workloads"
+}

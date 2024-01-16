@@ -1,0 +1,13 @@
+{
+    "Node": "external_node",
+    "Address": "192.168.21.123",
+    "NodeMeta": {
+      "external-node": "true",
+      "external-probe": "true"
+    },
+    "Service": {
+      "ID": "external-service",
+      "Service": "external-service",
+      "Port": 8080
+    }
+  }

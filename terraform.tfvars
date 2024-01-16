@@ -1,0 +1,11 @@
+deployment_name     = "rp-nomad"
+aws_region          = "ap-southeast-1"
+owner               = "rp"
+nomad_server_count  = 1
+nomad_client_count  = 2
+nomad_region        = "global"
+# consul_datacenter   = "dc1"
+# consul_server_count = 1
+# consul_client_count = 0
+# consul_version      = ""
+# consul_version      = 1.13

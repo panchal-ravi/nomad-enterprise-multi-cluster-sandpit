@@ -15,25 +15,19 @@ variable "owner" {
 variable "instance_type" {
   type = string
 }
-variable "nomad_server_count" {
+variable "consul_server_count" {
   type = number
 }
-variable "nomad_client_count" {
+variable "consul_client_count" {
   type = number
 }
-variable "nomad_region" {
-  type = string
-}
-variable "nomad_authoritative_region" {
-  type = string
-}
-variable "bastion_security_group_id" {
+variable "consul_datacenter" {
   type = string
 }
 variable "elb_security_group_id" {
   type = string
 }
-variable "consul_client_security_group_id" {
+variable "bastion_security_group_id" {
   type = string
 }
 variable "vpc_id" {
@@ -46,19 +40,16 @@ variable "bastion_ip" {
 }
 variable "ssh_key" {
 }
-variable "consul_datacenter" { default = "" }
-variable "consul_ca_crt" {}
 variable "gossip_key" {}
 variable "elb_arn" {}
+variable "consul_server_key" {}
+
+variable "consul_server_crt" {}
+
+variable "intermediate_ca" {}
+
+variable "root_ca" {}
 variable "elb_http_addr" {}
+variable "vault_connect_ca_polcy" {}
 variable "zones" {}
 variable "consul_version" {}
-variable "elb_listener_port" {}
-variable "ca_key" {}
-variable "ca_cert" {}
-variable "node_pools" {}
-variable "replication_token" {
-  default = ""
-}
-variable "vault_ip" {}
-variable "consul_auth_method_name" {}

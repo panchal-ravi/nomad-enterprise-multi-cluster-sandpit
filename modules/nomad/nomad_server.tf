@@ -6,7 +6,7 @@ data "aws_ami" "an_image" {
     values = ["${var.owner}-consul-nomad-enterprise*"]
   }
 }
-/*
+
 resource "consul_acl_policy" "nomad_server_agent" {
   count = var.nomad_server_count
   name  = "nomad-server-agent-${count.index}"
@@ -28,7 +28,7 @@ data "consul_acl_token_secret_id" "nomad_server" {
   count       = var.nomad_server_count
   accessor_id = element(consul_acl_token.nomad_server, count.index).id
 }
-*/
+
 
 resource "aws_instance" "nomad_server" {
   count                  = var.nomad_server_count
@@ -44,24 +44,6 @@ resource "aws_instance" "nomad_server" {
     ignore_changes = all
   }
 
-  provisioner "file" {
-    content = templatefile("${path.root}/files/nomad/nomad_server_config.hcl.tpl", {
-      index                      = count.index,
-      server_count               = var.nomad_server_count,
-      nomad_region               = var.nomad_region,
-      nomad_authoritative_region = var.nomad_authoritative_region,
-      private_ip                 = self.private_ip,
-      gossip_key                 = var.gossip_key,
-      node_name                  = "nomad-server-${count.index}",
-      zone                       = var.zones[count.index % length(var.zones)]
-      nomad_datacenter           = var.consul_datacenter,
-      replication_token          = trimspace(file("${path.root}/generated/nomad_management_token"))
-      # consul_token     = data.consul_acl_token_secret_id.nomad_server[count.index].secret_id,
-    })
-    destination = "/tmp/nomad.hcl"
-  }
-
-  /*
   provisioner "file" {
     content = templatefile("${path.root}/files/consul/consul_client_config${var.consul_version}.hcl.tpl", {
       index      = count.index,
@@ -85,7 +67,7 @@ resource "aws_instance" "nomad_server" {
     destination = "/tmp/connect_ca.crt"
   }
 
-    provisioner "file" {
+  provisioner "file" {
     content     = templatefile("${path.root}/files/consul/consul.service.tpl", {})
     destination = "/tmp/consul.service"
   }
@@ -99,7 +81,23 @@ resource "aws_instance" "nomad_server" {
     source      = "${path.root}/files/consul/license.hclic"
     destination = "/tmp/consul_license.hclic"
   }
-  */
+
+  provisioner "file" {
+    content = templatefile("${path.root}/files/nomad/nomad_server_config.hcl.tpl", {
+      index                      = count.index,
+      server_count               = var.nomad_server_count,
+      nomad_region               = var.nomad_region,
+      nomad_authoritative_region = var.nomad_authoritative_region,
+      private_ip                 = self.private_ip,
+      gossip_key                 = var.gossip_key,
+      node_name                  = "nomad-server-${count.index}",
+      zone                       = var.zones[count.index % length(var.zones)]
+      nomad_datacenter           = var.consul_datacenter,
+      replication_token          = trimspace(file("${path.root}/generated/nomad_management_token"))
+      consul_token               = data.consul_acl_token_secret_id.nomad_server[count.index].secret_id,
+    })
+    destination = "/tmp/nomad.hcl"
+  }
 
   provisioner "file" {
     content = templatefile("${path.root}/files/nomad/nomad.service.tpl", {
@@ -141,7 +139,6 @@ resource "aws_instance" "nomad_server" {
       "sudo mv /tmp/nomad.service /etc/systemd/system/nomad.service",
       "sudo chown -R nomad:nomad /etc/nomad.d",
 
-      /*
       "sudo mkdir -p /etc/consul.d/tls",
       "sudo mv /tmp/consul.hcl /etc/consul.d/consul.hcl",
       "sudo mv /tmp/consul_license.hclic /etc/consul.d/license.hclic",
@@ -150,13 +147,12 @@ resource "aws_instance" "nomad_server" {
       "sudo mv /tmp/connect_ca.crt /etc/consul.d/tls/connect_ca.crt",
       "sudo mv /tmp/consul.service /etc/systemd/system/consul.service",
       "sudo chown -R consul:consul /etc/consul.d",
-      */
 
       /* "sudo chmod 400 /home/ubuntu/ssh_key", */
 
       "sudo systemctl daemon-reload",
-      # "sudo systemctl start consul",
-      # "sleep 5",
+      "sudo systemctl start consul",
+      "sleep 5",
       "sudo systemctl start nomad",
       "sleep 5",
     ]

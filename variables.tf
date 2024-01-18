@@ -54,7 +54,7 @@ variable "nomad_region" {
 variable "nomad_client_count" {
   type = number
 }
-/*
+
 variable "consul_datacenter" {
   type = string
 }
@@ -68,4 +68,3 @@ variable "consul_version" {
   type = string
   default = ""
 }
-*/

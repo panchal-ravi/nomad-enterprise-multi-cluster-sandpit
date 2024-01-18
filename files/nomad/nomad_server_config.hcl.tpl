@@ -29,17 +29,17 @@ server {
   bootstrap_expect = ${server_count}
   redundancy_zone  = "${zone}"
   authoritative_region = "${nomad_authoritative_region}"
-
-  %{ if nomad_region == nomad_authoritative_region ~}
-  server_join {
-    retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
-  }
-  %{ endif ~}
-  %{ if nomad_region != nomad_authoritative_region ~}
-  server_join {
-    retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}", "provider=aws tag_key=nomad_role tag_value=server_${nomad_authoritative_region}"]
-  }
-  %{ endif ~}
+  
+  // %{ if nomad_region == nomad_authoritative_region ~}
+  // server_join {
+  //   retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
+  // }
+  // %{ endif ~}
+  // %{ if nomad_region != nomad_authoritative_region ~}
+  // server_join {
+  //   retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}", "provider=aws tag_key=nomad_role tag_value=server_${nomad_authoritative_region}"]
+  // }
+  // %{ endif ~}
 
   # license_path is required for Nomad Enterprise as of Nomad v1.1.1+
   license_path = "/etc/nomad.d/license.hclic"
@@ -77,12 +77,24 @@ acl {
 }
 
 # [optional] Specifies configuration for connecting to Consul
-// consul { 
-//   address = "127.0.0.1:8501"
-//   ssl = true
-//   token = "{consul_token}"
-//   ca_file = "/etc/consul.d/tls/connect_ca.crt" //this needs to be replaced with Connect CA
-// }
+consul { 
+  address = "127.0.0.1:8501"
+  ssl = true
+  token = "${consul_token}"
+  ca_file = "/etc/consul.d/tls/connect_ca.crt" //this needs to be replaced with Connect CA
+
+  service_identity {
+    aud = ["consul.io"]
+    ttl = "1h"
+  }
+
+  task_identity {
+    aud = ["consul.io"]
+    ttl = "1h"
+    env = true
+    file = true
+  }
+}
 
 # [optional] Specifies configuration for connecting to Vault
 vault {
@@ -98,7 +110,6 @@ vault {
     env = true
     file = true
   }
-
 
   // Below parameters are not applicable for Nomad Server agents
   // address     = "https://{vault_ip}:8200"

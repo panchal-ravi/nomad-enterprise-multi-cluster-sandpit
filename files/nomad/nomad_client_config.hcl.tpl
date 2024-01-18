@@ -41,9 +41,9 @@ server {
 client {
   enabled = true
   node_pool = "${node_pool}"
-  server_join {
-    retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
-  }
+  // server_join {
+  //   retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
+  // }
 } 
 
 plugin "docker" {
@@ -61,14 +61,17 @@ acl {
 }
 
 # [optional] Specifies configuration for connecting to Consul
-// consul { 
-//   address = "127.0.0.1:8501"
-//   grpc_address = "127.0.0.1:8502"  // uncomment this if Consul <= 1.13
-//   ssl = true
-//   token = "{consul_token}"
-//   ca_file = "/etc/consul.d/tls/connect_ca.crt" // This needs to be replaced with Connect CA
-//   grpc_ca_file = "/etc/consul.d/tls/connect_ca.crt"
-// }
+consul { 
+  address = "127.0.0.1:8501"
+  grpc_address = "127.0.0.1:8503"
+  ssl = true
+  token = "${consul_token}"
+  ca_file = "/etc/consul.d/tls/connect_ca.crt" // This needs to be replaced with Connect CA
+  grpc_ca_file = "/etc/consul.d/tls/connect_ca.crt"
+
+  service_auth_method = "${consul_auth_method_name}" // Name of the Consul authentication method used to login with Nomad JWT for services
+  task_auth_method = "${consul_auth_method_name}" // Name of the Consul authentication method used to login with Nomad JWT for tasks
+}
 
 # [optional] Specifies configuration for connecting to Vault
 vault {

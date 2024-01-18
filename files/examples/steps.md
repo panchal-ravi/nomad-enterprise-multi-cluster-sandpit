@@ -47,7 +47,29 @@ nomad job run -region sg ./files/examples/demo/vault/api.hcl
 
 ### Verify Vault secrets and tokens 
 
+nomad alloc exec ---
 
+### Delete job
+nomad job stop -namespace api-dev -purge api
+
+
+
+
+----------------------------------------------------------------------
+## Nomad-Consul Integration using Workload Identity
+----------------------------------------------------------------------
+
+### Create namespace for "api" team
+nomad namespace apply -region sg ./files/examples/demo/ns/api-dev-namespace.hcl 
+nomad namespace list -region sg
+
+
+nomad job run -region sg ./files/examples/demo/consul/api.hcl 
+
+### Show "api" service registered in Consul with ACL token generated using Nomad workload identity
+
+### Delete job
+nomad job stop -namespace api-dev -purge api
 
 
 ----------------------------------------------------------------------

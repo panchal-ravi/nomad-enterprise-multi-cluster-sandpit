@@ -16,8 +16,12 @@ output "bastion_ip" {
   value = module.infra_aws.bastion_ip
 }
 
-output "elb_http_addr" {
+output "nomad_http_addr" {
   value = "https://${module.infra_aws.elb_http_addr}:8080"
+}
+
+output "consul_http_addr" {
+  value = "https://${module.infra_aws.elb_http_addr}:8501"
 }
 
 output "vault_http_addr" {
@@ -28,13 +32,14 @@ output "vault_token" {
   value = module.infra_aws.vault_token
 }
 
-/*
-output "consul_client_ips" {
-  value = module.consul.consul_client_ips
-}
 output "consul_management_token" {
   value = module.consul.consul_management_token
 }
+
+output "consul_client_ips" {
+  value = module.consul.consul_client_ips
+}
+
 output "consul_server_ips" {
   value = module.consul.consul_server_ips
 }
@@ -42,4 +47,4 @@ output "consul_server_ips" {
 output "vault_ip" {
   value = module.infra_aws.vault_ip
 }
-*/
+

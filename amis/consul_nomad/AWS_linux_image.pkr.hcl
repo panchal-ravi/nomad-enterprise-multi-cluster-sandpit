@@ -84,8 +84,8 @@ build {
       "sudo mkdir -p /etc/nomad.d/data",
       "sudo chown -R nomad:nomad /etc/nomad.d",
       "sudo chown nomad:nomad /usr/local/bin/nomad",
-      "sudo mkdir -p /var/log/nomad",
-      "sudo chown -R nomad:nomad /var/log/nomad",
+      "sudo mkdir -p /var/log/nomad/audit",
+      "sudo chown -R nomad:nomad /var/log/nomad/audit",
     ]
   }
 

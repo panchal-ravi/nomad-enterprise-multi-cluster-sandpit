@@ -11,7 +11,7 @@ resource "random_uuid" "management_token" {
 }
 
 resource "vault_token" "connect_ca" {
-  policies  = [var.vault_connect_ca_polcy]
+  policies  = [var.vault.vault_connect_ca_polcy]
   renewable = true
   no_parent = true
   ttl       = "720h"
@@ -25,9 +25,9 @@ resource "aws_instance" "consul_server" {
   count                  = var.consul_server_count
   ami                    = data.aws_ami.an_image.id
   instance_type          = var.instance_type
-  key_name               = var.aws_keypair_keyname
-  vpc_security_group_ids = [module.consul_server_sg.security_group_id]
-  subnet_id              = element(var.private_subnets, count.index % length(var.private_subnets))
+  key_name               = var.infra_aws.aws_keypair_keyname
+  vpc_security_group_ids = [var.infra_aws.consul_server_security_group_id]
+  subnet_id              = element(var.infra_aws.private_subnets, count.index % length(var.infra_aws.private_subnets))
   iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
 
   lifecycle {
@@ -42,7 +42,7 @@ resource "aws_instance" "consul_server" {
       private_ip             = self.private_ip,
       gossip_key             = var.gossip_key,
       vault_connect_ca_token = vault_token.connect_ca.client_token,
-      elb_http_addr          = var.elb_http_addr,
+      elb_http_addr          = var.infra_aws.elb_http_addr,
       zone                   = var.zones[count.index % length(var.zones)]
     })
     destination = "/tmp/consul.hcl"
@@ -67,19 +67,19 @@ resource "aws_instance" "consul_server" {
 
   provisioner "file" {
     /* content     = tls_self_signed_cert.ca_cert.cert_pem */
-    content     = join("\n", [var.intermediate_ca, var.root_ca])
+    content     = join("\n", [var.vault.intermediate_ca, var.vault.root_ca])
     destination = "/tmp/consul-ca.crt"
   }
 
   provisioner "file" {
     /* content     = tls_locally_signed_cert.consul_server_signed_cert.cert_pem */
-    content     = var.consul_server_crt
+    content     = var.vault.consul_server_crt
     destination = "/tmp/consul.crt"
   }
 
   provisioner "file" {
     /* content     = tls_private_key.consul_server_private_key.private_key_pem */
-    content     = var.consul_server_key
+    content     = var.vault.consul_server_key
     destination = "/tmp/consul.key"
   }
 
@@ -111,14 +111,14 @@ resource "aws_instance" "consul_server" {
   }
 
   connection {
-    bastion_host        = var.bastion_ip
+    bastion_host        = var.infra_aws.bastion_ip
     bastion_user        = "ubuntu"
     agent               = false
-    bastion_private_key = var.ssh_key
+    bastion_private_key = var.infra_aws.ssh_key
 
     host        = self.private_ip
     user        = "ubuntu"
-    private_key = var.ssh_key
+    private_key = var.infra_aws.ssh_key
   }
 }
 

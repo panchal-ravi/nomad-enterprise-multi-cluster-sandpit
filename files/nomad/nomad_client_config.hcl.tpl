@@ -41,9 +41,13 @@ server {
 client {
   enabled = true
   node_pool = "${node_pool}"
-  // server_join {
-  //   retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
-  // }
+
+  %{ if nomad_region != nomad_authoritative_region ~}
+  server_join {
+    retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
+  }
+  %{ endif ~}
+
 } 
 
 plugin "docker" {
@@ -84,4 +88,43 @@ vault {
   ca_file               = "/etc/nomad.d/tls/ca.crt"
   tls_server_name       = "demo.server.vault"
   // create_from_role = "nomad-cluster"
+}
+
+audit {
+  enabled = true
+
+  sink "audit" {
+    type               = "file"
+    delivery_guarantee = "best-effort"
+    format             = "json"
+    path               = "/var/log/nomad/audit/audit.log"
+    rotate_bytes       = 10240000 
+    rotate_duration    = "24h"
+    rotate_max_files   = 10
+    mode               = "0600"
+  }
+
+  # Filter out all requests and all stages for /v1/metrics
+  filter "default" {
+    type       = "HTTPEvent"
+    endpoints  = ["/v1/metrics"]
+    stages     = ["*"]
+    operations = ["*"]
+  }
+
+  # Filter out requests where endpoint matches globbed pattern
+  filter "globbed example" {
+    type       = "HTTPEvent"
+    endpoints  = ["/v1/evaluation/*/allocations"]
+    stages     = ["*"]
+    operations = ["*"]
+  }
+
+  # Filter out OperationReceived GET requests for all endpoints
+  filter "OperationReceived GETs" {
+    type       = "HTTPEvent"
+    endpoints  = ["*"]
+    stages     = ["OperationReceived"]
+    operations = ["GET"]
+  }
 }

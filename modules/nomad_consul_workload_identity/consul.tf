@@ -3,10 +3,11 @@ locals {
   # compatible names. A mismatch can cause login requests to return 403 errors.
   tasks_role_prefix = "nomad-tasks"
   nomad_namespaces  = ["default", "api-dev"]
+  consul_namespace  = "api-dev"
 }
 
 resource "consul_namespace" "ns" {
-  name        = "api-dev"
+  name        = local.consul_namespace
   description = "Development namespace for api team"
 
   meta = {
@@ -98,10 +99,11 @@ resource "consul_acl_role" "tasks" {
   # adjusted as needed in a real cluster.
   for_each = toset(local.nomad_namespaces)
 
-  name = "${local.tasks_role_prefix}-${each.key}"
+  name      = "${local.tasks_role_prefix}-${each.key}"
+  namespace = each.key
 
   description = "ACL role for Nomad tasks in the ${each.key} Nomad namespace"
-  policies    = [consul_acl_policy.tasks.id]
+  policies    = [consul_acl_policy.tasks[each.key].id]
 }
 
 # consul_acl_policy.tasks is a sample ACL policy that grants tokens read access
@@ -110,10 +112,11 @@ resource "consul_acl_role" "tasks" {
 # This is the policy used in consul_acl_role.tasks if the variable
 # tasks_policy_ids is not set.
 resource "consul_acl_policy" "tasks" {
+  for_each    = toset(local.nomad_namespaces)
   name        = "nomad-tasks"
   description = "ACL policy used by Nomad tasks"
-
-  rules = <<EOF
+  namespace   = each.key
+  rules       = <<EOF
 key_prefix "" {
   policy = "read"
 }
@@ -122,4 +125,5 @@ service_prefix "" {
   policy = "read"
 }
 EOF
+  depends_on  = [consul_namespace.ns]
 }

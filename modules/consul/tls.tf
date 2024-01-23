@@ -3,10 +3,6 @@ resource "tls_private_key" "ca_private_key" {
   ecdsa_curve = "P256"
 }
 
-resource "local_file" "ca_private_key" {
-  content  = tls_private_key.ca_private_key.private_key_pem
-  filename = "${path.module}/tmp/ca.key"
-}
 
 resource "tls_self_signed_cert" "ca_cert" {
   private_key_pem = tls_private_key.ca_private_key.private_key_pem
@@ -31,20 +27,32 @@ resource "tls_self_signed_cert" "ca_cert" {
   ]
 }
 
+/*
 resource "local_file" "ca_cert" {
   content  = tls_self_signed_cert.ca_cert.cert_pem
-  filename = "${path.module}/tmp/ca.cert"
+  filename = "${path.module}/tmp/ca_${var.consul_datacenter}.cert"
 }
+
+resource "local_file" "consul_server_private_key" {
+  content  = tls_private_key.consul_server_private_key.private_key_pem
+  filename = "${path.module}/tmp/consul_server_${var.consul_datacenter}.key"
+}
+
+resource "local_file" "consul_server_cert" {
+  content  = tls_locally_signed_cert.consul_server_signed_cert.cert_pem
+  filename = "${path.module}/tmp/consul_server_${var.consul_datacenter}.crt"
+}
+
+resource "local_file" "ca_private_key" {
+  content  = tls_private_key.ca_private_key.private_key_pem
+  filename = "${path.module}/tmp/ca_${var.consul_datacenter}.key"
+}
+*/
 
 # Create private key for consul server certificate 
 resource "tls_private_key" "consul_server_private_key" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
-}
-
-resource "local_file" "consul_server_private_key" {
-  content  = tls_private_key.consul_server_private_key.private_key_pem
-  filename = "${path.module}/tmp/consul_server.key"
 }
 
 # Create CSR for for consul server certificate 
@@ -84,8 +92,5 @@ resource "tls_locally_signed_cert" "consul_server_signed_cert" {
   ]
 }
 
-resource "local_file" "consul_server_cert" {
-  content  = tls_locally_signed_cert.consul_server_signed_cert.cert_pem
-  filename = "${path.module}/tmp/consul_server.crt"
-}
+
 

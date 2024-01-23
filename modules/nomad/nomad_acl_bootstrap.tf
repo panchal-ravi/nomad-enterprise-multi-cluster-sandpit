@@ -8,7 +8,7 @@ resource null_resource "nomad_acl_bootstrap" {
     count = var.nomad_region == var.nomad_authoritative_region ? 1 : 0
     provisioner "local-exec" {
       command = <<-EOF
-        curl -s -k -X POST https://${var.elb_http_addr}:${var.elb_listener_port}/v1/acl/bootstrap | jq -r .SecretID > ${path.root}/generated/nomad_management_token
+        curl -s -k -X POST https://${var.infra_aws.elb_http_addr}:${var.elb_listener_port}/v1/acl/bootstrap | jq -r .SecretID > ${path.root}/generated/nomad_management_token
       EOF
     }
 

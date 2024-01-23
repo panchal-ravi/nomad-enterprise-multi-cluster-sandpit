@@ -35,11 +35,12 @@ server {
   //   retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}"]
   // }
   // %{ endif ~}
-  // %{ if nomad_region != nomad_authoritative_region ~}
-  // server_join {
-  //   retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}", "provider=aws tag_key=nomad_role tag_value=server_${nomad_authoritative_region}"]
-  // }
-  // %{ endif ~}
+
+  %{ if nomad_region != nomad_authoritative_region ~}
+  server_join {
+    retry_join = ["provider=aws tag_key=nomad_role tag_value=server_${nomad_region}", "provider=aws tag_key=nomad_role tag_value=server_${nomad_authoritative_region}"]
+  }
+  %{ endif ~}
 
   # license_path is required for Nomad Enterprise as of Nomad v1.1.1+
   license_path = "/etc/nomad.d/license.hclic"
@@ -115,4 +116,43 @@ vault {
   // address     = "https://{vault_ip}:8200"
   // ca_file     = "/etc/nomad.d/tls/ca.crt"
   // create_from_role = "nomad-cluster"
+}
+
+audit {
+  enabled = true
+
+  sink "audit" {
+    type               = "file"
+    delivery_guarantee = "best-effort"
+    format             = "json"
+    path               = "/var/log/nomad/audit/audit.log"
+    rotate_bytes       = 10240000 
+    rotate_duration    = "24h"
+    rotate_max_files   = 10
+    mode               = "0600"
+  }
+
+  # Filter out all requests and all stages for /v1/metrics
+  filter "default" {
+    type       = "HTTPEvent"
+    endpoints  = ["/v1/metrics"]
+    stages     = ["*"]
+    operations = ["*"]
+  }
+
+  # Filter out requests where endpoint matches globbed pattern
+  filter "globbed example" {
+    type       = "HTTPEvent"
+    endpoints  = ["/v1/evaluation/*/allocations"]
+    stages     = ["*"]
+    operations = ["*"]
+  }
+
+  # Filter out OperationReceived GET requests for all endpoints
+  filter "OperationReceived GETs" {
+    type       = "HTTPEvent"
+    endpoints  = ["*"]
+    stages     = ["OperationReceived"]
+    operations = ["GET"]
+  }
 }

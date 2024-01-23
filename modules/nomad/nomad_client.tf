@@ -25,9 +25,9 @@ resource "aws_instance" "nomad_client" {
   count                  = var.nomad_client_count
   ami                    = data.aws_ami.an_image.id
   instance_type          = var.instance_type
-  key_name               = var.aws_keypair_keyname
+  key_name               = var.infra_aws.aws_keypair_keyname
   vpc_security_group_ids = [module.nomad_client_sg.security_group_id]
-  subnet_id              = element(var.private_subnets, count.index % length(var.private_subnets))
+  subnet_id              = element(var.infra_aws.private_subnets, count.index % length(var.infra_aws.private_subnets))
   iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
   # vpc_security_group_ids = [module.nomad_client_sg.security_group_id, var.consul_client_security_group_id]
 
@@ -64,7 +64,7 @@ resource "aws_instance" "nomad_client" {
   }
 
   provisioner "file" {
-    source      = "${path.root}/generated/connect_ca.crt"
+    source      = "${path.root}/generated/connect_ca_${var.consul_datacenter}.crt"
     destination = "/tmp/connect_ca.crt"
   }
 
@@ -75,15 +75,17 @@ resource "aws_instance" "nomad_client" {
 
   provisioner "file" {
     content = templatefile("${path.root}/files/nomad/nomad_client_config.hcl.tpl", {
-      index                   = count.index,
-      nomad_region            = var.nomad_region,
-      private_ip              = self.private_ip,
-      nomad_datacenter        = "dc1",
-      node_name               = "nomad-client-${count.index}",
-      node_pool               = element(var.node_pools, count.index % length(var.node_pools))
-      vault_ip                = var.vault_ip
-      consul_token            = data.consul_acl_token_secret_id.nomad_client[count.index].secret_id,
-      consul_auth_method_name = var.consul_auth_method_name
+      index                      = count.index,
+      nomad_region               = var.nomad_region,
+      private_ip                 = self.private_ip,
+      nomad_datacenter           = "dc1",
+      nomad_region               = var.nomad_region,
+      nomad_authoritative_region = var.nomad_authoritative_region,
+      node_name                  = "nomad-client-${count.index}",
+      node_pool                  = element(var.node_pools, count.index % length(var.node_pools))
+      vault_ip                   = var.infra_aws.vault_ip
+      consul_token               = data.consul_acl_token_secret_id.nomad_client[count.index].secret_id,
+      consul_auth_method_name    = var.consul_auth_method_name
     })
     destination = "/tmp/nomad.hcl"
   }
@@ -96,7 +98,7 @@ resource "aws_instance" "nomad_client" {
   }
 
   provisioner "file" {
-    content     = var.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
+    content     = var.infra_aws.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
     destination = "/tmp/nomad_ca.pem"
   }
 
@@ -147,13 +149,13 @@ resource "aws_instance" "nomad_client" {
   }
 
   connection {
-    bastion_host        = var.bastion_ip
+    bastion_host        = var.infra_aws.bastion_ip
     bastion_user        = "ubuntu"
     agent               = false
-    bastion_private_key = var.ssh_key //file("${path.root}/generated/ssh_key") 
+    bastion_private_key = var.infra_aws.ssh_key //file("${path.root}/generated/ssh_key") 
 
     host        = self.private_ip
     user        = "ubuntu"
-    private_key = var.ssh_key //file("${path.root}/generated/ssh_key") 
+    private_key = var.infra_aws.ssh_key //file("${path.root}/generated/ssh_key") 
   }
 }

@@ -25,9 +25,9 @@ resource "aws_instance" "consul_client" {
   count                  = var.consul_client_count
   ami                    = data.aws_ami.an_image.id
   instance_type          = var.instance_type
-  key_name               = var.aws_keypair_keyname
-  vpc_security_group_ids = [module.consul_client_sg.security_group_id]
-  subnet_id              = element(var.private_subnets, count.index % length(var.private_subnets))
+  key_name               = var.infra_aws.aws_keypair_keyname
+  vpc_security_group_ids = [var.infra_aws.consul_client_security_group_id]
+  subnet_id              = element(var.infra_aws.private_subnets, count.index % length(var.infra_aws.private_subnets))
   iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
 
   lifecycle {
@@ -60,7 +60,7 @@ resource "aws_instance" "consul_client" {
 
   provisioner "file" {
     /* content     = tls_self_signed_cert.ca_cert.cert_pem */
-    content     = join("\n", [var.intermediate_ca, var.root_ca])
+    content     = join("\n", [var.vault.intermediate_ca, var.vault.root_ca])
     destination = "/tmp/consul-ca.crt"
   }
 
@@ -95,13 +95,13 @@ resource "aws_instance" "consul_client" {
   }
 
   connection {
-    bastion_host        = var.bastion_ip
+    bastion_host        = var.infra_aws.bastion_ip
     bastion_user        = "ubuntu"
     agent               = false
-    bastion_private_key = var.ssh_key //file("${path.root}/generated/ssh_key") //tls_private_key.ssh.private_key_openssh
+    bastion_private_key = var.infra_aws.ssh_key //file("${path.root}/generated/ssh_key") //tls_private_key.ssh.private_key_openssh
 
     host        = self.private_ip
     user        = "ubuntu"
-    private_key = var.ssh_key
+    private_key = var.infra_aws.ssh_key
   }
 }

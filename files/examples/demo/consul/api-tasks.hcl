@@ -4,17 +4,21 @@ job "api" {
   # datacenters = ["dc1"]
 
   group "api" {
-    count = 4
+    count = 1
     network {
       # mode = "bridge"
       port "http" {}
     }
 
+    consul {
+      namespace = "api-dev"
+    }
+
     service {
+      provider = "consul"
       name     = "api"
       port     = "http"
       tags     = ["http"]
-      provider = "nomad"
     }
 
     task "api" {
@@ -27,15 +31,17 @@ job "api" {
         LISTEN_ADDR = "0.0.0.0:${NOMAD_PORT_http}"
         MESSAGE     = "api-service"
       }
-      identity {
-        # Expose Workload Identity in NOMAD_TOKEN env var
-        env = true
-        # Expose Workload Identity in ${NOMAD_SECRETS_DIR}/nomad_token file
-        file = true
-      }
-      resources {
-        cpu    = 100
-        memory = 200
+      template {
+        data        = <<EOF
+        Consul Services:
+        {{- range services}}
+          * {{.Name}}{{end}}
+
+        Consul KV for "api/config":
+        {{- range ls "api/config"}}
+          * {{.Key}}: {{.Value}}{{end}}
+        EOF
+        destination = "local/consul-info.txt"
       }
     }
   }

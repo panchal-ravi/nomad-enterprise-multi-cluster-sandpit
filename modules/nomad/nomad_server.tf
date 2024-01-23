@@ -34,10 +34,10 @@ resource "aws_instance" "nomad_server" {
   count                  = var.nomad_server_count
   ami                    = data.aws_ami.an_image.id
   instance_type          = var.instance_type
-  key_name               = var.aws_keypair_keyname
+  key_name               = var.infra_aws.aws_keypair_keyname
   vpc_security_group_ids = [module.nomad_server_sg.security_group_id]
   # vpc_security_group_ids = [module.nomad_server_sg.security_group_id, var.consul_client_security_group_id]
-  subnet_id            = element(var.private_subnets, count.index % length(var.private_subnets))
+  subnet_id            = element(var.infra_aws.private_subnets, count.index % length(var.infra_aws.private_subnets))
   iam_instance_profile = aws_iam_instance_profile.instance_profile.name
 
   lifecycle {
@@ -63,7 +63,7 @@ resource "aws_instance" "nomad_server" {
   }
 
   provisioner "file" {
-    source      = "${path.root}/generated/connect_ca.crt"
+    source      = "${path.root}/generated/connect_ca_${var.consul_datacenter}.crt"
     destination = "/tmp/connect_ca.crt"
   }
 
@@ -113,7 +113,7 @@ resource "aws_instance" "nomad_server" {
 
 
   provisioner "file" {
-    content     = var.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
+    content     = var.infra_aws.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
     destination = "/tmp/nomad_ca.pem"
   }
 
@@ -165,14 +165,14 @@ resource "aws_instance" "nomad_server" {
   }
 
   connection {
-    bastion_host        = var.bastion_ip
+    bastion_host        = var.infra_aws.bastion_ip
     bastion_user        = "ubuntu"
     agent               = false
-    bastion_private_key = var.ssh_key //file("${path.root}/generated/ssh_key") //tls_private_key.ssh.private_key_openssh
+    bastion_private_key = var.infra_aws.ssh_key //file("${path.root}/generated/ssh_key") //tls_private_key.ssh.private_key_openssh
 
     host        = self.private_ip
     user        = "ubuntu"
-    private_key = var.ssh_key
+    private_key = var.infra_aws.ssh_key
   }
 }
 

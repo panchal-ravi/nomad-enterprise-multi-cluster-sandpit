@@ -9,13 +9,17 @@ job "api" {
       port "http" {}
     }
 
+    consul {
+      namespace = "api-dev"
+    }
+
     service {
-      provider = "nomad"
+      provider = "consul"
       name     = "api"
       port     = "http"
       tags     = ["http"]
     }
-
+    
     task "api" {
       driver = "docker"
 

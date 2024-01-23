@@ -7,12 +7,12 @@ output "consul_client_ips" {
 }
 
 
-output "consul_client_security_group_id" {
-  value = module.consul_client_sg.security_group_id
-}
+# output "consul_client_security_group_id" {
+#   value = module.consul_client_sg.security_group_id
+# }
 
 output "consul_ca_crt" {
-  value = join("\n", [var.intermediate_ca, var.root_ca])
+  value = join("\n", [var.vault.intermediate_ca, var.vault.root_ca])
 }
 
 output "consul_management_token" {

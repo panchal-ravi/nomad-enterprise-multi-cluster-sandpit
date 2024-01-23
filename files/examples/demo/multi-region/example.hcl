@@ -8,10 +8,12 @@ job "example" {
     region "sg" {
       count       = 2
       datacenters = ["dc1"]
+      node_pool = "dev"
     }
-    region "my" {
+    region "id" {
       count       = 1
       datacenters = ["dc1"]
+      node_pool = "dev"
     }
   }
 

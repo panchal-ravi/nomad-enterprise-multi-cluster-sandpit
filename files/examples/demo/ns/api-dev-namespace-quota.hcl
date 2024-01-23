@@ -1,4 +1,4 @@
-name = "api-dev"
+name = "api-dev-quota"
 description = "api-dev quota spec for multiple regions"
 
 # Create a limits for two regions

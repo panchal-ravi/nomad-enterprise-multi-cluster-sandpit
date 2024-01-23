@@ -1,3 +1,4 @@
+/*
 module "consul_server_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
@@ -85,3 +86,4 @@ module "consul_client_sg" {
   egress_rules       = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 }
+*/

@@ -53,8 +53,8 @@ connect {
   ca_config {
     address = "https://${elb_http_addr}:8200"
     token = "${vault_connect_ca_token}"
-    root_pki_path = "connect_root"
-    intermediate_pki_path = "connect_dc1_inter"
+    root_pki_path = "connect_root_${datacenter}"
+    intermediate_pki_path = "connect_${datacenter}_inter"
     leaf_cert_ttl = "72h"
     rotation_period = "2160h"
     intermediate_cert_ttl = "8760h"

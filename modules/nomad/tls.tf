@@ -47,7 +47,7 @@ resource "tls_cert_request" "nomad_server_csr" {
 
   private_key_pem = tls_private_key.nomad_server_private_key.private_key_pem
 
-  dns_names    = ["server.${var.nomad_region}.nomad", "localhost", "${var.elb_http_addr}"]
+  dns_names    = ["server.${var.nomad_region}.nomad", "localhost", "${var.infra_aws.elb_http_addr}"]
   ip_addresses = ["127.0.0.1"]
 
   subject {
@@ -65,9 +65,9 @@ resource "tls_locally_signed_cert" "nomad_server_signed_cert" {
   // CSR by the nomad servers
   cert_request_pem = tls_cert_request.nomad_server_csr.cert_request_pem
   // CA Private key 
-  ca_private_key_pem = var.ca_key //tls_private_key.ca_private_key.private_key_pem
+  ca_private_key_pem = var.infra_aws.ca_key //tls_private_key.ca_private_key.private_key_pem
   // CA certificate
-  ca_cert_pem = var.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
+  ca_cert_pem = var.infra_aws.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
 
   validity_period_hours = 43800
 
@@ -118,9 +118,9 @@ resource "tls_locally_signed_cert" "nomad_client_signed_cert" {
   // CSR by the nomad client
   cert_request_pem = tls_cert_request.nomad_client_csr.cert_request_pem
   // CA Private key 
-  ca_private_key_pem = var.ca_key //tls_private_key.ca_private_key.private_key_pem
+  ca_private_key_pem = var.infra_aws.ca_key //tls_private_key.ca_private_key.private_key_pem
   // CA certificate
-  ca_cert_pem = var.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
+  ca_cert_pem = var.infra_aws.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
 
   validity_period_hours = 43800
 
@@ -171,9 +171,9 @@ resource "tls_locally_signed_cert" "nomad_cli_signed_cert" {
   // CSR by the nomad cli
   cert_request_pem = tls_cert_request.nomad_cli_csr.cert_request_pem
   // CA Private key 
-  ca_private_key_pem = var.ca_key //tls_private_key.ca_private_key.private_key_pem
+  ca_private_key_pem = var.infra_aws.ca_key //tls_private_key.ca_private_key.private_key_pem
   // CA certificate
-  ca_cert_pem = var.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
+  ca_cert_pem = var.infra_aws.ca_cert //tls_self_signed_cert.ca_cert.cert_pem
 
   validity_period_hours = 43800
 

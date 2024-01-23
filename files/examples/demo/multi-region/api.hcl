@@ -1,9 +1,38 @@
 job "api" {
 
+
+  multiregion {
+    strategy {
+      max_parallel = 1
+      on_failure   = "fail_all"
+    }
+    region "sg" {
+      count       = 2
+      datacenters = ["dc1"]
+      node_pool   = "dev"
+    }
+    region "my" {
+      count       = 1
+      datacenters = ["dc1"]
+      node_pool   = "dev"
+    }
+  }
+
+  update {
+    max_parallel      = 1
+    min_healthy_time  = "10s"
+    healthy_deadline  = "2m"
+    progress_deadline = "3m"
+    auto_revert       = true
+    auto_promote      = true
+    canary            = 1
+    stagger           = "30s"
+  }
+
   group "api" {
-    count = 1
+    count = 0
     network {
-      mode = "bridge"
+      # mode = "bridge"
       port "http" {}
     }
 

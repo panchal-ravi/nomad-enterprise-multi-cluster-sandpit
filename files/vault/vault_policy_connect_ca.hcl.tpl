@@ -1,32 +1,32 @@
-path "/sys/mounts/connect_root" {
+path "/sys/mounts/connect_root_${datacenter}" {
   capabilities = [ "read" ]
 }
 
-path "/sys/mounts/connect_dc1_inter" {
+path "/sys/mounts/connect_${datacenter}_inter" {
   capabilities = [ "read" ]
 }
 
-path "/sys/mounts/connect_dc1_inter/tune" {
+path "/sys/mounts/connect_${datacenter}_inter/tune" {
   capabilities = [ "update" ]
 }
 
-path "/connect_root/" {
+path "/connect_root_${datacenter}/" {
   capabilities = [ "read" ]
 }
 
-path "/connect_root/root/sign-self-issued" {
+path "/connect_root_${datacenter}/root/sign-self-issued" {
   capabilities = [ "update", "sudo" ]
 }
 
-path "/connect_root/root/generate/internal" {
+path "/connect_root_${datacenter}/root/generate/internal" {
   capabilities = [ "update", "sudo" ]
 }
 
-path "/connect_root/root/sign-intermediate" {
+path "/connect_root_${datacenter}/root/sign-intermediate" {
   capabilities = [ "update" ]
 }
 
-path "/connect_dc1_inter/*" {
+path "/connect_${datacenter}_inter/*" {
   capabilities = [ "create", "read", "update", "delete", "list" ]
 }
 

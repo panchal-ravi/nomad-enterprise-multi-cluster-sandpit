@@ -26,3 +26,6 @@ variable "aws_instance_type" {
 variable "envoy_version" {
   type = string
 }
+variable "cni_plugin_version" {
+  type = string
+}

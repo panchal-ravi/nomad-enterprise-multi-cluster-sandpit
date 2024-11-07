@@ -34,12 +34,13 @@ nomad job run -region sg ./files/examples/demo/ns/api-restricted-np.hcl
 ### Create resource quota and attach it to namespace
 bat ./files/examples/demo/ns/api-dev-namespace-quota.hcl
 nomad quota apply ./files/examples/demo/ns/api-dev-namespace-quota.hcl 
+nomad quota status api-dev-quota
 
 ### Apply quota to namespace
-nomad namespace apply -quota api-dev api-dev 
+nomad namespace apply -quota api-dev-quota api-dev 
 
 ### Verify quota is applied to a namespace
-nomad namespace namespace status api-dev
+nomad namespace status api-dev
 
 ### Verify quota status
 nomad quota status api-dev
@@ -63,7 +64,7 @@ nomad job status -namespace api-dev api
 nomad namespace apply -quota= api-dev
 
 ### Delete quota
-nomad quota delete api-dev
+nomad quota delete api-dev-quota
 
 
 ----------------------------------------------------------------------
@@ -112,6 +113,7 @@ consul kv put -namespace api-dev 'api/config/cache' '500'
 consul kv put -namespace api-dev 'api/config/maxconn' '1000'
 consul kv put -namespace api-dev 'api/config/minconn' '30'
 
+bat ./files/examples/demo/consul/api-tasks.hcl
 nomad job run -region sg ./files/examples/demo/consul/api-tasks.hcl 
 
 nomad alloc exec -namespace api-dev -job api sh

@@ -10,7 +10,7 @@ source "amazon-ebs" "ubuntu-image" {
   source_ami_filter {
       filters = {
         virtualization-type = "hvm"
-        name = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+        name = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
         root-device-type = "ebs"
       }
       owners = ["099720109477"]
@@ -64,9 +64,17 @@ build {
       "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
 
       // Install CNI Plugins
-      "curl -L -o cni-plugins.tgz \"https://github.com/containernetworking/plugins/releases/download/v1.0.0/cni-plugins-linux-$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)\"-v1.0.0.tgz",
+      "export ARCH_CNI=$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)",
+      "export CNI_PLUGIN_VERSION=${var.cni_plugin_version}",
+      "curl -L -o cni-plugins.tgz \"https://github.com/containernetworking/plugins/releases/download/$CNI_PLUGIN_VERSION/cni-plugins-linux-$ARCH_CNI-$CNI_PLUGIN_VERSION\".tgz",
       "sudo mkdir -p /opt/cni/bin",
       "sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz",
+      "sudo modprobe bridge",
+      "sudo modprobe br_netfilter",
+
+      // Install Consul-CNI plugin
+      # "curl -L -o consul-cni.zip \"https://releases.hashicorp.com/consul-cni/1.5.0/consul-cni_1.5.3_linux_$ARCH_CNI\".zip",
+      # "sudo unzip consul-cni.zip -d /opt/cni/bin -x LICENSE.txt",
 
       "echo 1 | sudo tee /proc/sys/net/bridge/bridge-nf-call-arptables",
       "echo 1 | sudo tee /proc/sys/net/bridge/bridge-nf-call-ip6tables",

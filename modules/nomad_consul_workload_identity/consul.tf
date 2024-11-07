@@ -86,8 +86,6 @@ resource "consul_acl_binding_rule" "tasks" {
   selector = "\"nomad_service\" not in value"
 }
 
-
-
 # consul_acl_role.tasks is the ACL role that attaches a set of policies and
 # permissions to tokens.
 #
